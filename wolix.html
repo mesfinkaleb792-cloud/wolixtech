@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>WOLIX | Smart Schedule + Attendance Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #05070a; font-family: 'Inter', sans-serif; color: #eef2ff; line-height: 1.5; scroll-behavior: smooth; }
+  #particles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.5; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 2; }
+  .glass-header { background: rgba(10, 15, 24, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(34, 197, 94, 0.3); position: sticky; top: 0; z-index: 100; }
+  .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; max-width: 1400px; margin: 0 auto; flex-wrap: wrap; gap: 1rem; }
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .header-logo-img { height: 44px; width: auto; filter: drop-shadow(0 0 6px rgba(34,197,94,0.3)); transition: transform 0.2s ease; }
+  .logo-text { display: flex; align-items: baseline; gap: 4px; font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px; background: linear-gradient(135deg, #22c55e, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .logo-text span { font-size: 1rem; font-weight: 500; background: none; color: #94a3b8; }
+  .dynamic-date-badge { background: rgba(34, 197, 94, 0.2); backdrop-filter: blur(4px); border-radius: 60px; padding: 0.4rem 1.2rem; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(34, 197, 94, 0.5); font-weight: 500; font-size: 0.9rem; }
+  .dynamic-date-badge i { font-size: 1.1rem; color: #22c55e; }
+  .date-text { font-weight: 600; background: linear-gradient(135deg, #e2e8f0, #bbf7d0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { font-size: 0.9rem; color: #cbd5e1; border-left: 1px solid #334155; padding-left: 1rem; }
+  .live-schedule-alert { background: linear-gradient(135deg, #0f172a, #0a0f1c); border-radius: 1.2rem; margin: 1.5rem 0 0.5rem 0; padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-left: 5px solid #22c55e; border-right: 1px solid rgba(34,197,94,0.3); backdrop-filter: blur(4px); transition: all 0.2s ease; }
+  @keyframes pulseGlow { 0% { border-left-color: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,0.2);} 50% { border-left-color: #4ade80; box-shadow: 0 0 8px 2px rgba(34,197,94,0.3);} 100% { border-left-color: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,0.2);} }
+  .schedule-status-icon { font-size: 2rem; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); width: 55px; height: 55px; border-radius: 60px; }
+  .schedule-status-text { flex: 1; }
+  .schedule-status-text h4 { font-size: 0.9rem; font-weight: 600; color: #86efac; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+  .schedule-status-text p { font-size: 1.2rem; font-weight: 700; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .block-timeframe { font-size: 0.85rem; font-weight: 500; background: #1e293b; padding: 0.2rem 0.7rem; border-radius: 40px; color: #cbd5e6; }
+  .live-countdown { background: #1e293b; padding: 0.5rem 1.2rem; border-radius: 50px; font-family: monospace; font-weight: 800; font-size: 1.3rem; color: #22c55e; letter-spacing: 1px; }
+  .hero-section { display: flex; justify-content: center; margin: 2rem 0 1rem 0; }
+  .profile-card { background: linear-gradient(145deg, rgba(15, 25, 35, 0.85), rgba(8, 12, 20, 0.95)); backdrop-filter: blur(8px); border-radius: 2rem; padding: 2rem 2.5rem; text-align: center; border: 1px solid rgba(34, 197, 94, 0.3); width: 100%; max-width: 750px; transition: 0.2s; }
+  .avatar-icon { font-size: 3.5rem; background: #1e293b; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 1rem; color: #22c55e; border: 2px solid #22c55e; }
+  .profile-card h1 { font-size: 2.2rem; font-weight: 700; background: linear-gradient(to right, #f0f9ff, #bbf7d0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .profile-badge { display: inline-block; background: rgba(34,197,94,0.15); padding: 0.25rem 1rem; border-radius: 40px; font-size: 0.8rem; color: #86efac; margin: 0.75rem 0; }
+  .divider { height: 2px; background: linear-gradient(90deg, transparent, #22c55e, #3b82f6, transparent); margin: 1.5rem 0; }
+  .section-heading { display: flex; align-items: center; gap: 12px; margin: 2.5rem 0 1.8rem 0; }
+  .section-heading i { font-size: 2rem; color: #22c55e; background: rgba(34,197,94,0.15); padding: 8px; border-radius: 16px; }
+  .section-heading h2 { font-size: 1.8rem; font-weight: 700; color: #e2e8f0; }
+  .dual-track { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  .track-card { background: rgba(18, 25, 40, 0.7); border-radius: 1.5rem; padding: 1.5rem; border-top: 3px solid; transition: all 0.3s ease; }
+  .track-card.web-track { border-top-color: #3b82f6; }
+  .track-card.android-track { border-top-color: #22c55e; }
+  .track-card:hover { transform: translateY(-4px); background: rgba(34,197,94,0.08); }
+  .track-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; }
+  .track-header i { font-size: 2rem; }
+  .track-header h3 { font-size: 1.4rem; font-weight: 700; }
+  .timeline-list { list-style: none; padding: 0; }
+  .timeline-list li { padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: baseline; gap: 8px; }
+  .timeline-list li i { font-size: 0.8rem; color: #22c55e; }
+  .month-badge { font-weight: 700; color: #86efac; min-width: 65px; }
+  .schedule-group { background: rgba(12, 18, 28, 0.6); border-radius: 1.5rem; margin-bottom: 1rem; overflow: hidden; border: 1px solid rgba(51, 65, 85, 0.5); }
+  .accordion-header { background: rgba(20, 30, 44, 0.7); padding: 1rem 1.5rem; font-weight: 700; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; color: #e2e8f0; }
+  .accordion-header i { color: #22c55e; transition: transform 0.3s; }
+  .accordion-header.active i { transform: rotate(180deg); }
+  .accordion-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.33, 1, 0.68, 1); background: rgba(8, 12, 20, 0.5); padding: 0 1.5rem; }
+  .accordion-panel.open { max-height: 800px; padding: 1.2rem 1.5rem 1.5rem 1.5rem; }
+  .schedule-item { margin-bottom: 1rem; }
+  .item-label { display: flex; justify-content: space-between; font-weight: 500; margin-bottom: 6px; }
+  .progress-bar-bg { background: #1e293b; border-radius: 20px; height: 8px; overflow: hidden; }
+  .progress-fill { width: 0%; height: 100%; border-radius: 20px; transition: width 1s ease-out; }
+  .web-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .android-fill { background: linear-gradient(90deg, #22c55e, #4ade80); }
+  .spiritual-fill { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+  .study-fill { background: linear-gradient(90deg, #facc15, #fde047); }
+  .break-fill { background: linear-gradient(90deg, #fb923c, #fdba74); }
+  .sleep-fill { background: linear-gradient(90deg, #6b7280, #9ca3af); }
+  .weekly-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .day-card { background: rgba(15, 23, 42, 0.7); border-radius: 1.2rem; padding: 1rem 1.2rem; border-bottom: 2px solid #22c55e; }
+  .day-name { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; color: #bbf7d0; }
+  .study-detail { margin-top: 8px; font-size: 0.9rem; color: #cbd5e6; }
+  .badge-secondary { background: #334155; border-radius: 30px; padding: 0.2rem 0.6rem; font-size: 0.7rem; display: inline-block; margin-top: 6px; }
+  footer { margin-top: 4rem; text-align: center; padding: 2rem; border-top: 1px solid rgba(34,197,94,0.2); font-size: 0.85rem; color: #7e8ba3; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .footer-logo { width: 38px; height: 38px; object-fit: contain; }
+  @media (max-width: 860px) { .dual-track { grid-template-columns: 1fr; } .container { padding: 0 1.2rem; } .profile-card { padding: 1.5rem; } .navbar { flex-direction: column; text-align: center; } .live-schedule-alert { flex-direction: column; text-align: center; } }
+  @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+  .track-card, .profile-card, .schedule-group, .day-card { opacity: 0; animation: fadeSlideUp 0.5s ease forwards; }
+
+  /* MODAL STYLES */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.2s;
+  }
+  .modal-overlay.active {
+    visibility: visible;
+    opacity: 1;
+  }
+  .attendance-modal {
+    background: #0f172ad9;
+    border-radius: 2rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    border: 1px solid #22c55e;
+    box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+  }
+  .attendance-modal h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #facc15;
+  }
+  .attendance-modal p {
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+  .modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+    transition: 0.2s;
+  }
+  .btn-yes {
+    background: #22c55e;
+    color: #000;
+  }
+  .btn-yes:hover {
+    background: #4ade80;
+    transform: scale(1.02);
+  }
+  .btn-no {
+    background: #ef4444;
+    color: white;
+  }
+  .btn-no:hover {
+    background: #f87171;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<header class="glass-header">
+  <div class="navbar">
+    <div class="logo-area">
+      <img src="wol.png" alt="WOLIX Logo" class="header-logo-img" onerror="this.style.display='none';">
+      <div class="logo-text">WOLIX<span>5 MONTH ROADMAP</span></div>
+    </div>
+    <div class="dynamic-date-badge" id="liveCalendarBadge">
+      <i class="fas fa-calendar-alt"></i>
+      <span id="currentDateDisplay">Loading...</span>
+    </div>
+    <div class="tagline">
+      <i class="fas fa-code"> </i> Android + Full-Stack · Engineering smart living
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  
+  <div id="liveScheduleContainer" class="live-schedule-alert">
+   
+    <div class="schedule-status-text">
+      <h4><i class="fas fa-bolt"></i> REAL-TIME ACTIVE SCHEDULE</h4>
+      <p id="scheduleActivityMsg">Loading schedule...</p>
+    </div>
+    <div id="dynamicCountdown" class="live-countdown">--:--:--</div>
+  </div>
+
+  <div class="hero-section">
+    <div class="profile-card">
+      <div class="avatar-icon"><i class="fas fa-user-astronaut"></i></div>
+      <h1>Mesfin Kaleb</h1>
+      <div class="profile-badge"><i class="fas fa-graduation-cap"></i> 2nd Year Computer Science · Wolaita Sodo University</div>
+      <p style="margin-top: 8px; color: #cbd5e6;"><i class="fas fa-crown"></i> Founder of WOLIX — Engineering Smart Living</p>
+      <div class="divider"></div>
+      <div style="display: flex; justify-content: center; gap: 1.5rem; font-size: 0.9rem; flex-wrap: wrap;">
+        <span><i class="fas fa-globe" style="color:#3b82f6"></i> Full-Stack</span>
+        <span><i class="fab fa-android" style="color:#22c55e"></i> Android Dev</span>
+        <span><i class="fas fa-database" style="color:#facc15"></i> Backend</span>
+        <span><i class="fas fa-chalkboard-user" style="color:#8b5cf6"></i> Academic Excellence</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading"><i class="fas fa-map-signs"></i><h2>5-Month Dual Track Roadmap</h2></div>
+  <div class="dual-track">
+    <div class="track-card web-track">
+      <div class="track-header"><i class="fas fa-laptop-code" style="color:#3b82f6"></i><h3>Full-Stack Web Development</h3></div>
+      <ul class="timeline-list"><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 1:</span> HTML5, CSS3, Flexbox, Grid</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 2:</span> JavaScript (ES6+), DOM, APIs</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 3:</span> Advanced JS + Projects</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 4:</span> PHP, MySQL, Auth</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 5:</span> Full-Stack Project + Deployment</li></ul>
+    </div>
+    <div class="track-card android-track">
+      <div class="track-header"><i class="fab fa-android" style="color:#22c55e"></i><h3>Android Development</h3></div>
+      <ul class="timeline-list"><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 1:</span> Kotlin Basics, Activities, Intents</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 2:</span> RecyclerView, Fragments</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 3:</span> Jetpack Compose, MVVM</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 4:</span> Room, Firebase</li><li><i class="fas fa-calendar-alt"></i><span class="month-badge">Month 5:</span> WOLIX Companion App</li></ul>
+    </div>
+  </div>
+
+  <div class="section-heading"><i class="fas fa-clock"></i><h2>Precision Daily Schedule</h2></div>
+  <div class="schedule-group"><div class="accordion-header"><span><i class="fas fa-sun"></i> Morning Session</span><i class="fas fa-chevron-down"></i></div><div class="accordion-panel"><div class="schedule-item"><div class="item-label"><span><i class="fas fa-laptop-code"></i> Web Development</span><span>4:00 – 6:00</span></div><div class="progress-bar-bg"><div class="progress-fill web-fill" data-width="80"></div></div></div><div class="schedule-item"><div class="item-label"><span><i class="fas fa-pray"></i> Spiritual / Prayer</span><span>6:00 – 7:00</span></div><div class="progress-bar-bg"><div class="progress-fill spiritual-fill" data-width="60"></div></div></div><div class="schedule-item"><div class="item-label"><span><i class="fas fa-utensils"></i> Breakfast</span><span>7:00 – 8:00</span></div><div class="progress-bar-bg"><div class="progress-fill break-fill" data-width="50"></div></div></div></div></div>
+  <div class="schedule-group"><div class="accordion-header"><span><i class="fas fa-university"></i> Academic Session</span><i class="fas fa-chevron-down"></i></div><div class="accordion-panel"><div class="schedule-item"><div class="item-label"><span><i class="fas fa-chalkboard"></i> Class Time (University)</span><span>8:00 – 12:00</span></div><div class="progress-bar-bg"><div class="progress-fill study-fill" data-width="90"></div></div></div></div></div>
+  <div class="schedule-group"><div class="accordion-header"><span><i class="fas fa-mug-hot"></i> Midday</span><i class="fas fa-chevron-down"></i></div><div class="accordion-panel"><div class="schedule-item"><div class="item-label"><span><i class="fas fa-utensil-spoon"></i> Cafeteria / Rest</span><span>12:00 – 2:00</span></div><div class="progress-bar-bg"><div class="progress-fill break-fill" data-width="60"></div></div></div></div></div>
+  <div class="schedule-group"><div class="accordion-header"><span><i class="fas fa-microchip"></i> Afternoon Session</span><i class="fas fa-chevron-down"></i></div><div class="accordion-panel"><div class="schedule-item"><div class="item-label"><span><i class="fas fa-chalkboard-user"></i> Class Time (University)</span><span>2:00 – 4:00</span></div><div class="progress-bar-bg"><div class="progress-fill study-fill" data-width="80"></div></div></div><div class="schedule-item"><div class="item-label"><span><i class="fab fa-android"></i> Android Development</span><span>4:00 – 6:00</span></div><div class="progress-bar-bg"><div class="progress-fill android-fill" data-width="85"></div></div></div></div></div>
+  <div class="schedule-group"><div class="accordion-header"><span><i class="fas fa-moon"></i> Evening Session</span><i class="fas fa-chevron-down"></i></div><div class="accordion-panel"><div class="schedule-item"><div class="item-label"><span><i class="fas fa-spa"></i> Rest / Relax</span><span>6:00 – 7:00</span></div><div class="progress-bar-bg"><div class="progress-fill spiritual-fill" data-width="70"></div></div></div><div class="schedule-item"><div class="item-label"><span><i class="fas fa-brain"></i> Night Study</span><span>7:00 – 10:30</span></div><div class="progress-bar-bg"><div class="progress-fill study-fill" data-width="90"></div></div></div></div></div>
+  <div class="schedule-group"><div class="accordion-header"><span><i class="fas fa-bed"></i> Night</span><i class="fas fa-chevron-down"></i></div><div class="accordion-panel"><div class="schedule-item"><div class="item-label"><span><i class="fas fa-hourglass-half"></i> Sleep</span><span>10:30 – 4:00</span></div><div class="progress-bar-bg"><div class="progress-fill sleep-fill" data-width="100"></div></div></div></div></div>
+
+  <div class="section-heading"><i class="fas fa-calendar-week"></i><h2>Weekly Night Study Plan</h2></div>
+  <div class="weekly-grid">
+    <div class="day-card"><div class="day-name"><i class="fas fa-calendar-day"></i> Monday</div><div class="study-detail"><strong>Main:</strong> Networking<br><span class="badge-secondary">If class missed: Networking</span></div></div>
+    <div class="day-card"><div class="day-name"><i class="fas fa-calendar-day"></i> Tuesday</div><div class="study-detail"><strong>Main:</strong> DSA<br><span class="badge-secondary">If class missed: DSA</span></div></div>
+    <div class="day-card"><div class="day-name"><i class="fas fa-calendar-day"></i> Wednesday</div><div class="study-detail"><strong>Main:</strong> ADBMS<br><span class="badge-secondary">If class missed: ADBMS</span></div></div>
+    <div class="day-card"><div class="day-name"><i class="fas fa-calendar-day"></i> Thursday</div><div class="study-detail"><strong>Main:</strong> COA<br><span class="badge-secondary">If class missed: COA</span></div></div>
+    <div class="day-card"><div class="day-name"><i class="fas fa-calendar-day"></i> Friday</div><div class="study-detail"><strong>Main:</strong> DSA<br><span class="badge-secondary">If class missed: DSA</span></div></div> 
+  <div class="day-card"><div class="day-name"><i class="fas fa-chart-line"></i> Saturday</div><div class="study-detail"><strong>Morning:</strong> Discrete Math<br><strong>Night:</strong> Numerical Methods</div></div>
+    <div class="day-card"><div class="day-name"><i class="fas fa-calendar-day"></i> Sunday</div><div class="study-detail"><strong>Morning:</strong> Church<br><strong>Afternoon & Night:</strong> Free / Rest</div></div>
+  </div>
+</main>
+  <div class="day-card"><div class="day-name"><i class></i>Started on  date 23 March</div><div class="study-detail"></div></div>
+<footer><img src="wol.png" alt="WOLIX Logo" class="footer-logo"> WOLIX · Engineering Smart Living · © 2025 Mesfin Kaleb · Android + Full-Stack Excellence</footer>
+
+<!-- Attendance Modal -->
+<div id="attendanceModal" class="modal-overlay">
+  <div class="attendance-modal">
+    <h3><i class="fas fa-chalkboard-user"></i> Attend Class?</h3>
+    <p>It's <strong id="modalClassName"></strong> time.<br>Are you attending the lecture?</p>
+    <div class="modal-buttons">
+      <button id="modalYes" class="btn btn-yes">✅ Yes, I'm in class</button>
+      <button id="modalNo" class="btn btn-no">❌ No, I'm absent</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- FULL DAILY SCHEDULE (24/7) ----------
+  const SCHEDULE_BLOCKS = [
+    { name: "Web Development", start: 4*60, end: 6*60, icon: "fa-laptop-code", timeLabel: "4:00 AM – 6:00 AM", type: "dev" },
+    { name: "Spiritual / Prayer", start: 6*60, end: 7*60, icon: "fa-pray", timeLabel: "6:00 AM – 7:00 AM", type: "spiritual" },
+    { name: "Breakfast", start: 7*60, end: 8*60, icon: "fa-utensils", timeLabel: "7:00 AM – 8:00 AM", type: "break" },
+    { name: "University Morning Class", start: 8*60, end: 12*60, icon: "fa-chalkboard-user", timeLabel: "8:00 AM – 12:00 PM", type: "academic" },
+    { name: "Midday Rest / Cafeteria", start: 12*60, end: 14*60, icon: "fa-mug-hot", timeLabel: "12:00 PM – 2:00 PM", type: "break" },
+    { name: "University Afternoon Class", start: 14*60, end: 16*60, icon: "fa-chalkboard-user", timeLabel: "2:00 PM – 4:00 PM", type: "academic" },
+    { name: "Android Development", start: 16*60, end: 18*60, icon: "fab fa-android", timeLabel: "4:00 PM – 6:00 PM", type: "dev" },
+    { name: "Evening Rest / Relax", start: 18*60, end: 19*60, icon: "fa-spa", timeLabel: "6:00 PM – 7:00 PM", type: "break" },
+    { name: "Night Study (Core Subjects)", start: 19*60, end: 22*60+30, icon: "fa-brain", timeLabel: "7:00 PM – 10:30 PM", type: "study" },
+    { name: "Sleep", start: 22*60+30, end: 4*60 + 24*60, icon: "fa-bed", timeLabel: "10:30 PM – 4:00 AM", type: "sleep" }
+  ];
+
+  // Missed‑class subjects per weekday (0=Sun, 1=Mon ... 6=Sat)
+  const MISSED_SUBJECTS = {
+    1: "Networking",    // Monday
+    2: "DSA",           // Tuesday
+    3: "ADBMS",         // Wednesday
+    4: "COA",           // Thursday
+    5: "DSA",           // Friday
+    6: "Discrete Math"  // Saturday (if needed)
+  };
+
+  // Storage for overrides and prompted flags (persisted in localStorage)
+  let sessionOverrides = {};    // key => subject string
+  let sessionPrompted = {};     // key => boolean
+
+  function loadStorage() {
+    try {
+      const storedOverrides = localStorage.getItem("wolix_overrides");
+      const storedPrompted = localStorage.getItem("wolix_prompted");
+      if (storedOverrides) sessionOverrides = JSON.parse(storedOverrides);
+      if (storedPrompted) sessionPrompted = JSON.parse(storedPrompted);
+    } catch(e) {}
+  }
+  function saveStorage() {
+    localStorage.setItem("wolix_overrides", JSON.stringify(sessionOverrides));
+    localStorage.setItem("wolix_prompted", JSON.stringify(sessionPrompted));
+  }
+
+  // Helper: get session key for an academic block (morning/afternoon)
+  function getSessionKey(blockName, date) {
+    const dayStr = date.toISOString().slice(0,10);
+    if (blockName.includes("Morning")) return `morning_${dayStr}`;
+    if (blockName.includes("Afternoon")) return `afternoon_${dayStr}`;
+    return null;
+  }
+
+  // Get active block at given minutes
+  function getActiveBlock(currentMinutes) {
+    for (let block of SCHEDULE_BLOCKS) {
+      const start = block.start;
+      const end = block.end;
+      if (start < end) {
+        if (currentMinutes >= start && currentMinutes < end) return block;
+      } else {
+        if (currentMinutes >= start || currentMinutes < end) return block;
+      }
+    }
+    return SCHEDULE_BLOCKS[0];
+  }
+
+  function getSecondsUntilBlockEnd(activeBlock, nowDate) {
+    const nowMinutes = nowDate.getHours() * 60 + nowDate.getMinutes();
+    let endMin = activeBlock.end;
+    let endDate = new Date(nowDate);
+    if (activeBlock.start < activeBlock.end) {
+      endDate.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
+      if (nowMinutes >= endMin) endDate.setDate(endDate.getDate() + 1);
+    } else {
+      let endHour = Math.floor(endMin / 60);
+      let endMinute = endMin % 60;
+      endDate.setHours(endHour, endMinute, 0, 0);
+      if (nowMinutes >= activeBlock.start) endDate.setDate(endDate.getDate() + 1);
+    }
+    return Math.max(0, Math.floor((endDate - nowDate) / 1000));
+  }
+
+  // UI update with possible override
+  function updateLiveScheduleUI() {
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    let activeBlock = getActiveBlock(currentMinutes);
+    const isAcademic = activeBlock.type === "academic";
+    let displayName = activeBlock.name;
+    let displayIcon = activeBlock.icon;
+    let isOverridden = false;
+
+    if (isAcademic) {
+      const sessionKey = getSessionKey(activeBlock.name, now);
+      if (sessionKey && sessionOverrides[sessionKey]) {
+        displayName = sessionOverrides[sessionKey];
+        displayIcon = "fa-book-open";
+        isOverridden = true;
+      }
+    }
+
+    // update DOM
+    const iconDiv = document.getElementById("statusIcon");
+    const msgPara = document.getElementById("scheduleActivityMsg");
+    const timerSpan = document.getElementById("dynamicCountdown");
+
+    if (iconDiv) iconDiv.innerHTML = `<i class="${displayIcon}" style="font-size: 2rem;"></i>`;
+    const timeframeStr = activeBlock.timeLabel;
+    let activeHtml = `<strong style="color:#facc15;">${isOverridden ? "📘 MISSED CLASS → STUDYING" : "🔴 ACTIVE NOW"}</strong>  ${displayName}`;
+    msgPara.innerHTML = `${activeHtml} <span class="block-timeframe"><i class="far fa-clock"></i> ${timeframeStr}</span>`;
+
+    const remainingSec = getSecondsUntilBlockEnd(activeBlock, now);
+    const hrs = Math.floor(remainingSec / 3600);
+    const mins = Math.floor((remainingSec % 3600) / 60);
+    const secs = remainingSec % 60;
+    timerSpan.innerHTML = `Ends in ${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+
+    // dynamic border color
+    let borderColor = "#22c55e";
+    if (activeBlock.type === "academic") borderColor = "#3b82f6";
+    else if (activeBlock.type === "dev") borderColor = "#22c55e";
+    else if (activeBlock.type === "study") borderColor = "#facc15";
+    const container = document.getElementById("liveScheduleContainer");
+    container.style.borderLeftColor = borderColor;
+    container.style.animation = "pulseGlow 2s infinite";
+
+    // --- Attendance modal trigger (only for academic blocks, if not prompted and no override already)
+    if (isAcademic && !isOverridden) {
+      const sessionKey = getSessionKey(activeBlock.name, now);
+      if (sessionKey && !sessionPrompted[sessionKey]) {
+        showAttendanceModal(activeBlock.name, sessionKey);
+      }
+    }
+  }
+
+  // Modal logic
+  let currentModalSessionKey = null;
+  let currentModalBlockName = null;
+
+  function showAttendanceModal(blockName, sessionKey) {
+    // avoid showing if already prompted or if we already have an override (just in case)
+    if (sessionPrompted[sessionKey] || sessionOverrides[sessionKey]) return;
+    const modal = document.getElementById("attendanceModal");
+    const modalClassNameSpan = document.getElementById("modalClassName");
+    if (modalClassNameSpan) modalClassNameSpan.innerText = blockName;
+    currentModalSessionKey = sessionKey;
+    currentModalBlockName = blockName;
+    modal.classList.add("active");
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("attendanceModal");
+    modal.classList.remove("active");
+    currentModalSessionKey = null;
+  }
+
+  function handleAttendance(answer) {
+    if (!currentModalSessionKey) return;
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
+    if (answer === "yes") {
+      // Mark as prompted, no override
+      sessionPrompted[currentModalSessionKey] = true;
+    } else {
+      // No -> apply missed subject override
+      let missedSubject = MISSED_SUBJECTS[dayOfWeek] || "Self‑Study";
+      sessionOverrides[currentModalSessionKey] = missedSubject;
+      sessionPrompted[currentModalSessionKey] = true;
+    }
+    saveStorage();
+    closeModal();
+    // immediately refresh UI to show override if any
+    updateLiveScheduleUI();
+  }
+
+  // attach modal buttons
+  document.getElementById("modalYes").addEventListener("click", () => handleAttendance("yes"));
+  document.getElementById("modalNo").addEventListener("click", () => handleAttendance("no"));
+
+  // Calendar & particle init (unchanged from original)
+  function updateDynamicCalendar() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = now.toLocaleDateString(undefined, options);
+    const dateDisplayElement = document.getElementById('currentDateDisplay');
+    if (dateDisplayElement) dateDisplayElement.innerHTML = `<span class="date-text">${formattedDate}</span>`;
+  }
+
+  function initAccordionAndProgress() {
+    const headers = document.querySelectorAll('.accordion-header');
+    headers.forEach(header => {
+      header.addEventListener('click', () => {
+        const panel = header.nextElementSibling;
+        const isOpen = panel.classList.contains('open');
+        document.querySelectorAll('.accordion-panel').forEach(p => { if (p !== panel) { p.classList.remove('open'); if(p.previousElementSibling) p.previousElementSibling.classList.remove('active'); } });
+        document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+        if (!isOpen) { panel.classList.add('open'); header.classList.add('active'); const fills = panel.querySelectorAll('.progress-fill'); fills.forEach(fill => { const w = fill.getAttribute('data-width'); if (w) fill.style.width = w + '%'; }); }
+        else { panel.classList.remove('open'); header.classList.remove('active'); }
+      });
+    });
+    const firstHeader = document.querySelector('.schedule-group .accordion-header');
+    if (firstHeader) { const fp = firstHeader.nextElementSibling; if (fp && !fp.classList.contains('open')) { fp.classList.add('open'); firstHeader.classList.add('active'); const fills = fp.querySelectorAll('.progress-fill'); fills.forEach(f => { const w = f.getAttribute('data-width'); if (w) f.style.width = w + '%'; }); } }
+    document.querySelectorAll('.accordion-panel.open').forEach(panel => { const fills = panel.querySelectorAll('.progress-fill'); fills.forEach(fill => { const w = fill.getAttribute('data-width'); if (w) fill.style.width = w + '%'; }); });
+  }
+
+  // Particles (original)
+  const canvas = document.getElementById('particles-canvas');
+  let ctx = canvas.getContext('2d');
+  let width = window.innerWidth, height = window.innerHeight;
+  let particlesArray = [];
+  function initParticles() { particlesArray = []; for (let i = 0; i < 120; i++) { particlesArray.push({ x: Math.random() * width, y: Math.random() * height, radius: Math.random() * 1.8 + 0.8, dx: (Math.random() - 0.5) * 0.5, dy: (Math.random() - 0.5) * 0.3, alpha: Math.random() * 0.4 + 0.2 }); } }
+  function drawParticles() { if (!ctx) return; ctx.clearRect(0, 0, width, height); for (let p of particlesArray) { ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fillStyle = `rgba(34, 197, 94, ${p.alpha})`; ctx.fill(); p.x += p.dx; p.y += p.dy; if (p.x > width) p.x = 0; if (p.x < 0) p.x = width; if (p.y > height) p.y = 0; if (p.y < 0) p.y = height; } requestAnimationFrame(drawParticles); }
+  function resizeCanvas() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; initParticles(); }
+  window.addEventListener('resize', resizeCanvas); resizeCanvas(); drawParticles();
+
+  // final initialization
+  loadStorage();
+  initAccordionAndProgress();
+  updateLiveScheduleUI();
+  updateDynamicCalendar();
+  setInterval(updateLiveScheduleUI, 1000);
+  setInterval(updateDynamicCalendar, 60000);
+</script>
+</body>
+</html>
